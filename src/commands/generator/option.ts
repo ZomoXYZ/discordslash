@@ -1,7 +1,7 @@
 import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../../types/commands";
 import { normalizeOption, optionsType } from "../../util/normalizeOption";
 
-export default class CommandOptionGenerator {
+export class CommandOptionGenerator {
     type: OptionTypes;
     name: string;
     description: string;
