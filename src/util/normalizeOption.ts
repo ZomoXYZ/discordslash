@@ -1,6 +1,8 @@
 type JsonObject = { [key: string]: any };
 
-export default function<T extends JsonObject, U extends { toJson: () => JsonObject}>(option: T | U | T[] | U[]): T[] {
+export type optionsType<T, U> = T | U | T[] | U[];
+
+export function normalizeOption<T extends JsonObject, U extends { toJson: () => JsonObject}>(option: optionsType<T, U>): T[] {
 
     const options: T[] = [];
 

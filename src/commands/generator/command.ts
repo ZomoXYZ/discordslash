@@ -1,6 +1,6 @@
 import { Command, CommandOption, CommandTypes } from "../../types/commands";
-import optionNormal from "../../util/optionNormal";
-import CommandOptionsGenerator from "./options";
+import { normalizeOption, optionsType } from "../../util/normalizeOption";
+import CommandOptionsGenerator from "./option";
 
 export default class CommandGenerator {
     name: string;
@@ -28,8 +28,8 @@ export default class CommandGenerator {
         this.description = description;
         return this;
     }
-    addOption(option: CommandOption | CommandOptionsGenerator | CommandOption[] | CommandOptionsGenerator[]) {
-        this.options.push(...optionNormal(option));
+    addOption(option: optionsType<CommandOption, CommandOptionsGenerator>) {
+        this.options.push(...normalizeOption(option));
         return this;
     }
     setDefaultPermission(permission: boolean) {

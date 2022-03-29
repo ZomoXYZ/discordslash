@@ -1,7 +1,7 @@
 import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../../types/commands";
-import optionNormal from "../../util/optionNormal";
+import { normalizeOption, optionsType } from "../../util/normalizeOption";
 
-export default class CommandOptionsGenerator {
+export default class CommandOptionGenerator {
     type: OptionTypes;
     name: string;
     description: string;
@@ -60,12 +60,12 @@ export default class CommandOptionsGenerator {
             }
 
         } else {
-            this.choices.push(...optionNormal(arg1));
+            this.choices.push(...normalizeOption(arg1));
         }
         return this;
     }
-    addOption(options: CommandOption | CommandOptionsGenerator | CommandOption[] | CommandOptionsGenerator[]) {
-        this.options.push(...optionNormal(options));
+    addOption(options: optionsType<CommandOption, CommandOptionGenerator>) {
+        this.options.push(...normalizeOption(options));
         return this;
     }
     setChannelTypes(channel_types: ChannelTypes[]) {
