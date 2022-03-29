@@ -12,4 +12,4 @@ export function add(command: optionsType<Command, CommandGenerator>) {
 export {
     CommandGenerator,
     CommandOptionGenerator
-};
+}

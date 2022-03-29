@@ -5,13 +5,13 @@ export class CommandOptionGenerator {
     type: OptionTypes;
     name: string;
     description: string;
-    required?: boolean;
-    choices?: OptionChoices[];
-    options?: CommandOption[];
-    channel_types?: ChannelTypes[];
+    required: boolean;
+    choices: OptionChoices[];
+    options: CommandOption[];
+    channel_types: ChannelTypes[];
     min_value?: number;
     max_value?: number;
-    autocomplete?: boolean;
+    autocomplete: boolean;
 
     constructor() {
         this.type = OptionTypes.STRING;
