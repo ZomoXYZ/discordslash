@@ -1,0 +1,40 @@
+import { Command } from "../types/commands";
+import { REST } from '@discordjs/rest';
+import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
+import { findInArray } from "../util/array";
+
+export async function registerCommands(commands: Command[], token: string, clientID: string) {
+
+    const rest = new REST({ version: '10' }).setToken(token),
+        commandsToRegister = await checkCommands(commands, rest, clientID);
+
+    await rest.put(
+        Routes.applicationCommands(clientID),
+        { body: commandsToRegister }
+    );
+    
+}
+
+async function checkCommands(commandsOrig: Command[], rest: REST, clientID: string) {
+
+    let commands = commandsOrig;
+    
+    let foundCommands = await rest.get(
+        Routes.applicationCommands(clientID)
+    ) as APIApplicationCommand[];
+
+    foundCommands.forEach((foundCmd: APIApplicationCommand) => {
+
+        let { data, index } = findInArray(commands, cmd => cmd.name === foundCmd.name),
+            cmd = data as Command;
+
+        // if the command exists and is the same, delete from list
+        if (cmd && cmd.description === foundCmd.description && cmd.type === foundCmd.type && cmd.default_permission === foundCmd.default_permission) {
+            commands.splice(index, 1);
+        }
+
+    });
+
+    return commands;
+
+}
