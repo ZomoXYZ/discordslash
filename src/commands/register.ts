@@ -29,6 +29,7 @@ async function checkCommands(commandsOrig: Command[], rest: REST, clientID: stri
             cmd = data as Command;
 
         // if the command exists and is the same, delete from list
+        // @ts-ignore ts(2367)
         if (cmd && cmd.description === foundCmd.description && cmd.type === foundCmd.type && cmd.default_permission === foundCmd.default_permission) {
             commands.splice(index, 1);
         }

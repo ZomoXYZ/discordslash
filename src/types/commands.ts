@@ -1,4 +1,3 @@
-import { ApplicationCommandType } from "discord-api-types/v10";
 import { CommandInteraction } from "discord.js";
 
 export enum OptionTypes {
@@ -29,6 +28,12 @@ export enum ChannelTypes {
     GUILD_STAGE_VOICE
 }
 
+export enum CommandTypes {
+    CHAT_INPUT = 1,
+    USER,
+    MESSAGE
+}
+
 export interface OptionChoices {
     name: string;
     value: string|number;
@@ -55,7 +60,7 @@ export interface Command {
      * default: true
      */
     default_permission?: boolean;
-    type?: ApplicationCommandType;
+    type?: CommandTypes;
 }
 
 export type CommandRunnableFn = (interaction: CommandInteraction) => void|Promise<void>;
