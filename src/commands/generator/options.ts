@@ -42,6 +42,13 @@ export default class CommandOptionsGenerator {
         this.required = required;
         return this;
     }
+    /**
+     * overloads
+     * ```
+     * addChoice(choices: OptionChoices | OptionChoices[])
+     * addChoice(name: string, value: string|number)
+     * ```
+     */
     addChoice(arg1: OptionChoices | OptionChoices[] | string, arg2?: string|number) {
         if (typeof arg1 === "string") {
             
