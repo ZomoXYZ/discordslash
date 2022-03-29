@@ -1,7 +1,7 @@
-import { Command } from "../types/commands";
+import { Command } from "./types/commands";
 import { REST } from '@discordjs/rest';
 import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
-import { findInArray } from "../util/array";
+import { findInArray } from "./util/array";
 
 export async function registerCommands(commands: Command[], token: string, clientID: string) {
 

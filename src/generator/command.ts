@@ -1,5 +1,5 @@
-import { Command, CommandOption, CommandTypes, CommandRunnableFn, CommandRunnable } from "../../types/commands";
-import { normalizeOption, optionsType } from "../../util/normalizeOption";
+import { Command, CommandOption, CommandTypes, CommandRunnableFn, CommandRunnable } from "../types/commands";
+import { normalizeOption, optionsType } from "../util/normalizeOption";
 import { CommandOptionGenerator } from "./option";
 
 export class CommandGenerator {

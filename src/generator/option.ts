@@ -1,5 +1,5 @@
-import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../../types/commands";
-import { normalizeOption, optionsType } from "../../util/normalizeOption";
+import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../types/commands";
+import { normalizeOption, optionsType } from "../util/normalizeOption";
 
 //TODO functions that use this generator for main OptionTypes
 
