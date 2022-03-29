@@ -1,24 +1,28 @@
 type JsonObject = { [key: string]: any };
 
-export type optionsType<T, U> = T | U | T[] | U[];
+export type optionsType<T, U> = T | U | (T | U)[];
 
-export function normalizeOption<T extends JsonObject, U extends { toJson: () => JsonObject }>(option: optionsType<T, U>): T[] {
+export function normalizeOption<T extends JsonObject, U extends JsonObject>(option: optionsType<T, U>, method = 'toJson'): T[] {
 
     const options: T[] = [];
 
     if (Array.isArray(option)) {
+
         if (option.length > 0) {
 
-            if ('toJson' in option[0] && option[0].toJson instanceof Function)
-                return option.map(opt => opt.toJson());
-            else
-                return option as T[];
+            return option.map(opt => {
+                if (method in opt && opt[method] instanceof Function)
+                    return opt[method]();
+                else
+                    return opt;
+            });
 
         }
+
     } else {
 
-        if ('toJson' in option && option.toJson instanceof Function)
-            return [option.toJson()];
+        if (method in option && option[method] instanceof Function)
+            return [option[method]()];
         else
             return [option] as T[];
 

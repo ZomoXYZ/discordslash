@@ -1,4 +1,4 @@
-import { Command, CommandOption, CommandTypes } from "../../types/commands";
+import { Command, CommandOption, CommandTypes, CommandRunnableFn, CommandRunnable } from "../../types/commands";
 import { normalizeOption, optionsType } from "../../util/normalizeOption";
 import { CommandOptionGenerator } from "./option";
 
@@ -6,11 +6,9 @@ export class CommandGenerator {
     name: string;
     description: string;
     options: CommandOption[];
-    /**
-     * default: true
-     */
-    default_permission?: boolean;
-    type?: CommandTypes;
+    default_permission: boolean;
+    type: CommandTypes;
+    run: CommandRunnableFn;
 
     constructor() {
         this.name = "";
@@ -18,6 +16,7 @@ export class CommandGenerator {
         this.options = [];
         this.default_permission = true;
         this.type = CommandTypes.CHAT_INPUT;
+        this.run = () => {};
     }
 
     setName(name: string) {
@@ -41,6 +40,11 @@ export class CommandGenerator {
         return this;
     }
 
+    setRun(fn: CommandRunnableFn) {
+        this.run = fn;
+        return this;
+    }
+
     toJson(): Command {
         return {
             name: this.name,
@@ -48,6 +52,17 @@ export class CommandGenerator {
             options: this.options,
             default_permission: this.default_permission,
             type: this.type
+        }
+    }
+
+    toJsonRunnable(): CommandRunnable {
+        return {
+            name: this.name,
+            description: this.description,
+            options: this.options,
+            default_permission: this.default_permission,
+            type: this.type,
+            run: this.run
         }
     }
 

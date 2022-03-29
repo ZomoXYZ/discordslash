@@ -63,6 +63,7 @@ export interface Command {
     type?: CommandTypes;
 }
 
+export type CommandRunnableFn = (interaction: CommandInteraction) => void|Promise<void>;
 export interface CommandRunnable extends Command {
-    run: (interaction: CommandInteraction) => void|Promise<void>;
+    run: CommandRunnableFn;
 }
