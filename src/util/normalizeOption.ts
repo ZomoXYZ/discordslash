@@ -2,6 +2,15 @@ type JsonObject = { [key: string]: any };
 
 export type optionsType<T, U> = T | U | (T | U)[];
 
+/**
+ * Combines a types and its generator into one: `T | U | (T | U)[]` -> `T[]`
+ * 
+ * Assumes
+ *  - `method` arg does not exist on type `T`
+ *  - `method` arg exists on type `U`
+ *  - `method` arg on type `U` is a function
+ *  - function `method` on type `U` returns `T`
+ */
 export function normalizeOption<T extends JsonObject, U extends JsonObject>(option: optionsType<T, U>, method = 'toJson'): T[] {
 
     const options: T[] = [];

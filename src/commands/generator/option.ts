@@ -1,6 +1,8 @@
 import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../../types/commands";
 import { normalizeOption, optionsType } from "../../util/normalizeOption";
 
+//TODO functions that use this generator for main OptionTypes
+
 export class CommandOptionGenerator {
     type: OptionTypes;
     name: string;
@@ -21,8 +23,6 @@ export class CommandOptionGenerator {
         this.choices = [];
         this.options = [];
         this.channel_types = [];
-        this.min_value = undefined;
-        this.max_value = undefined;
         this.autocomplete = false;
     }
 
