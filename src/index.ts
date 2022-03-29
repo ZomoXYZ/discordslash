@@ -1,4 +1,4 @@
 
 
 export * from './esbuild/plugin';
-export * from './commands'
+export * from './commands/main';
