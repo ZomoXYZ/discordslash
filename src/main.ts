@@ -34,10 +34,10 @@ export {
 export function initClient(client: Client, token: string) {
     
     //client isn't ready
-    if (!client.isReady)
-        client.once('ready', clientReady => _initClient(clientReady, token));
-    else
+    if (client.readyAt !== null)
         _initClient(client, token);
+    else
+        client.once('ready', clientReady => _initClient(clientReady, token));
 
 }
 
