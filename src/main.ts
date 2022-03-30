@@ -1,10 +1,12 @@
 import { Client, CommandInteraction } from "discord.js";
-import { Command, CommandRunnable, CommandInterRunnable } from "./types/commands";
+import { Command, CommandRunnable } from "./types/commands";
 import { emsg, errorMessage } from "./util/errorMessage";
 import { normalizeOption, optionsType } from "./util/normalizeOption";
 import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
+
+export * from "./util/errorMessage";
 
 const CommandsRaw: Command[] = [],
     Commands: Map<string, (interaction: CommandInteraction) => void|Promise<void>> = new Map();
