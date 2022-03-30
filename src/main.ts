@@ -38,20 +38,20 @@ export {
 }
 
 //command execution
-export function initClient(client: Client, token: string) {
+export function initClient(client: Client) {
     
     //client isn't ready
     if (client.readyAt !== null)
-        _initClient(client, token);
+        _initClient(client);
     else
-        client.once('ready', clientReady => _initClient(clientReady, token));
+        client.once('ready', clientReady => _initClient(clientReady));
 
 }
 
-function _initClient(client: Client<true>, token: string) {
+function _initClient(client: Client<true>) {
 
     ClientReady = true;
-    ClientToken = token;
+    ClientToken = client.token;
     ClientID = client.user.id;
 
     registerCommands(CommandsRaw, ClientToken, ClientID);
