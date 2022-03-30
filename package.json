@@ -4,11 +4,10 @@
     "version": "1.0.0",
     "main": "lib/main.js",
     "types": "lib/main.d.ts",
-    "devDependencies": {},
     "scripts": {
         "build": "tsc",
         "buildexamples": "node buildexample.js",
-		"prepare": "npm run build"
+        "prepare": "npm run build"
     },
     "repository": {
         "type": "git",

@@ -2,6 +2,7 @@ import { Command } from "./types/commands";
 import { REST } from '@discordjs/rest';
 import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
 import { findInArray } from "./util/array";
+import Lang from "lang";
 
 export async function registerCommands(commands: Command[], token: string, clientID: string) {
 
@@ -38,7 +39,6 @@ async function checkCommands(commandsOrig: Command[], rest: REST, clientID: stri
 
     });
 
-    //TODO Lang
     commands.forEach(cmd => console.log(`Registering command ${cmd.name}`));
 
     return commands;

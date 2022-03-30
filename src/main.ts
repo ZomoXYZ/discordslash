@@ -5,9 +5,14 @@ import { normalizeOption, optionsType } from "./util/normalizeOption";
 import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
+import Lang, { setLang } from "lang";
 
 export { emsg, errorMessage };
 export * from './types/commands';
+
+setLang({
+
+})
 
 const CommandsRaw: Command[] = [],
     Commands: Map<string, (interaction: CommandInteraction) => void|Promise<void>> = new Map();
@@ -66,7 +71,6 @@ function _initClient(client: Client<true>) {
             var commandsFound = Commands.get(interaction.commandName);
 
             if (!commandsFound) {
-                // TODO Lang
                 throw emsg(`Command ${interaction.commandName} not found`);
             }
 
