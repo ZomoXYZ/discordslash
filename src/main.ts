@@ -5,14 +5,9 @@ import { normalizeOption, optionsType } from "./util/normalizeOption";
 import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
-import Lang, { setLang } from "lang";
 
 export { emsg, errorMessage };
 export * from './types/commands';
-
-setLang({
-
-})
 
 const CommandsRaw: Command[] = [],
     Commands: Map<string, (interaction: CommandInteraction) => void|Promise<void>> = new Map();
