@@ -15,6 +15,8 @@ export async function registerCommands(commands: Command[], token: string, clien
     
 }
 
+const str = (s: string) => s.replace(/\n/g, '');
+
 async function checkCommands(commandsOrig: Command[], rest: REST, clientID: string) {
 
     let commands = commandsOrig;
@@ -30,7 +32,7 @@ async function checkCommands(commandsOrig: Command[], rest: REST, clientID: stri
 
         // if the command exists and is the same, delete from list
         // @ts-ignore ts(2367)
-        if (cmd && cmd.description === foundCmd.description && cmd.type === foundCmd.type && cmd.default_permission === foundCmd.default_permission) {
+        if (cmd && str(cmd.description) === str(foundCmd.description) && str(cmd.type) === str(foundCmd.type) && str(cmd.default_permission) === str(foundCmd.default_permission)) {
             commands.splice(index, 1);
         }
 
