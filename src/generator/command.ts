@@ -30,17 +30,17 @@ export class CommandGenerator {
     /**
      * overloads
      * ```
-     * addOption(option: optionsType<CommandOption, CommandOptionGenerator>)
+     * addOption(options: optionsType<CommandOption, CommandOptionGenerator>)
      * addOption(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number)
      * ```
      */
-    addOption(option: optionsType<CommandOption, CommandOptionGenerator>|string, type?: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
-        if (typeof option === 'string') {
+    addOption(options: optionsType<CommandOption, CommandOptionGenerator>|string, type?: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
+        if (typeof options === 'string') {
             if (type !== undefined) {
-                this.options.push(CommandOpt(option, type, description, required, min_value, max_value));
+                this.options.push(CommandOpt(options, type, description, required, min_value, max_value));
             }
         } else {
-            this.options.push(...normalizeOption(option));
+            this.options.push(...normalizeOption(options));
         }
         return this;
     }

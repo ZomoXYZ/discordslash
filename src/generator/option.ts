@@ -70,8 +70,21 @@ export class CommandOptionGenerator {
         }
         return this;
     }
-    addOption(options: optionsType<CommandOption, CommandOptionGenerator>) {
-        this.options.push(...normalizeOption(options));
+    /**
+     * overloads
+     * ```
+     * addOption(options: optionsType<CommandOption, CommandOptionGenerator>)
+     * addOption(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number)
+     * ```
+     */
+    addOption(options: optionsType<CommandOption, CommandOptionGenerator>|string, type?: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
+        if (typeof options === 'string') {
+            if (type !== undefined) {
+                this.options.push(CommandOpt(options, type, description, required, min_value, max_value));
+            }
+        } else {
+            this.options.push(...normalizeOption(options));
+        }
         return this;
     }
     setChannelTypes(channel_types: ChannelTypes[]) {
