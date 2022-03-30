@@ -6,22 +6,27 @@ import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
 
-//command creation
 const CommandsRaw: Command[] = [],
     Commands: Map<string, (interaction: CommandInteraction) => void|Promise<void>> = new Map();
+    
+var ClientReady = false,
+    ClientToken = '',
+    ClientID = '';
 
-export function addCommand(command: optionsType<CommandRunnable, CommandGenerator>) {
+export function addCommand(commandRaw: optionsType<CommandRunnable, CommandGenerator>) {
 
-    let command_n = normalizeOption(command, 'toJsonRunnable');
-    command_n.forEach(c => {
+    let commands = normalizeOption(commandRaw),
+        commands_n = normalizeOption(commandRaw, 'toJsonRunnable');
+
+    CommandsRaw.push(...commands);
+    
+    commands_n.forEach(c => {
         Commands.set(c.name, c.run);
     });
 
-    //push command without `run` method
-    CommandsRaw.push(...command_n.map((c: CommandInterRunnable) => {
-        delete c.run;
-        return c;
-    }));
+    if (ClientReady) {
+        registerCommands(CommandsRaw, ClientToken, ClientID);
+    }
 
 }
 
@@ -43,7 +48,11 @@ export function initClient(client: Client, token: string) {
 
 function _initClient(client: Client<true>, token: string) {
 
-    registerCommands(CommandsRaw, token, client.user.id);
+    ClientReady = true;
+    ClientToken = token;
+    ClientID = client.user.id;
+
+    registerCommands(CommandsRaw, ClientToken, ClientID);
 
     client.on('interactionCreate', async interaction => {
 
