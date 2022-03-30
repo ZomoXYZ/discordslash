@@ -38,6 +38,7 @@ async function checkCommands(commandsOrig: Command[], rest: REST, clientID: stri
 
     });
 
+    //TODO Lang
     commands.forEach(cmd => console.log(`Registering command ${cmd.name}`));
 
     return commands;
