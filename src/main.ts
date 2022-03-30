@@ -6,7 +6,7 @@ import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
 
-export * from "./util/errorMessage";
+export { emsg, errorMessage };
 
 const CommandsRaw: Command[] = [],
     Commands: Map<string, (interaction: CommandInteraction) => void|Promise<void>> = new Map();
