@@ -107,3 +107,19 @@ export class CommandOptionGenerator {
     }
 
 }
+export function CommandOpt(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
+    let option = new CommandOptionGenerator()
+        .setName(name)
+        .setType(type)
+
+    if (description)
+        option.setDescription(description)
+    if (required)
+        option.setRequired()
+    if (min_value)
+        option.setMinValue(min_value)
+    if (max_value)
+        option.setMaxValue(max_value);
+
+    return option;
+}

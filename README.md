@@ -26,15 +26,7 @@ addCommand([
     new CommandGenerator()
         .setName('8ball')
         .setDescription('ask the magic 8ball a question')
-        .addOption([
-
-            new CommandOptionGenerator()
-                .setName('question')
-                .setType('string')
-                .setDescription('question to ask the 8ball')
-                .setRequired()
-
-        ])
+        .addOption('question', 'string', 'question to ask the 8ball', true)
         .setRun(EightBall)
 ]);
 

@@ -1,6 +1,6 @@
-import { Command, CommandOption, CommandTypes, CommandRunnableFn, CommandRunnable } from "../types/commands";
+import { Command, CommandOption, CommandTypes, CommandRunnableFn, CommandRunnable, OptionTypes, OptionTypesString } from "../types/commands";
 import { normalizeOption, optionsType } from "../util/normalizeOption";
-import { CommandOptionGenerator } from "./option";
+import { CommandOpt, CommandOptionGenerator } from "./option";
 
 export class CommandGenerator {
     name: string;
@@ -27,8 +27,21 @@ export class CommandGenerator {
         this.description = description;
         return this;
     }
-    addOption(option: optionsType<CommandOption, CommandOptionGenerator>) {
-        this.options.push(...normalizeOption(option));
+    /**
+     * overloads
+     * ```
+     * addOption(option: optionsType<CommandOption, CommandOptionGenerator>)
+     * addOption(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number)
+     * ```
+     */
+    addOption(option: optionsType<CommandOption, CommandOptionGenerator>|string, type?: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
+        if (typeof option === 'string') {
+            if (type !== undefined) {
+                this.options.push(CommandOpt(option, type, description, required, min_value, max_value));
+            }
+        } else {
+            this.options.push(...normalizeOption(option));
+        }
         return this;
     }
     setPrivate() {
