@@ -34,6 +34,8 @@ async function checkCommands(commandsOrig: Command[], rest: REST, clientID: stri
         // @ts-ignore ts(2367)
         if (cmd && str(cmd.description) === str(foundCmd.description) && str(cmd.type) === str(foundCmd.type) && str(cmd.default_permission) === str(foundCmd.default_permission)) {
             commands.splice(index, 1);
+        } else {
+            console.log(`Registering Command ${foundCmd.name}`);
         }
 
     });
