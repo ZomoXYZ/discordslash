@@ -31,8 +31,8 @@ export class CommandGenerator {
         this.options.push(...normalizeOption(option));
         return this;
     }
-    setDefaultPermission(permission: boolean) {
-        this.default_permission = permission;
+    setPrivate() {
+        this.default_permission = true;
         return this;
     }
     setType(type: CommandTypes) {

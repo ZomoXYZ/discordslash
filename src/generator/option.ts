@@ -1,4 +1,4 @@
-import { ChannelTypes, CommandOption, OptionChoices, OptionTypes } from "../types/commands";
+import { ChannelTypes, CommandOption, OptionChoices, OptionTypes, OptionTypesString, OptionTypesStringMap } from "../types/commands";
 import { normalizeOption, optionsType } from "../util/normalizeOption";
 
 //TODO functions that use this generator for main OptionTypes
@@ -26,8 +26,14 @@ export class CommandOptionGenerator {
         this.autocomplete = false;
     }
 
-    setType(type: OptionTypes) {
-        this.type = type;
+    setType(type: OptionTypes | OptionTypesString) {
+
+        if (typeof type === 'number') {
+            this.type = type;
+        } else {
+            this.type = OptionTypesStringMap[type];
+        }
+
         return this;
     }
     setName(name: string) {
@@ -38,8 +44,8 @@ export class CommandOptionGenerator {
         this.description = description;
         return this;
     }
-    setRequired(required: boolean) {
-        this.required = required;
+    setRequired() {
+        this.required = true;
         return this;
     }
     /**
@@ -80,8 +86,8 @@ export class CommandOptionGenerator {
         this.max_value = max_value;
         return this;
     }
-    setAutocomplete(autocomplete: boolean) {
-        this.autocomplete = autocomplete;
+    setAutocomplete() {
+        this.autocomplete = true;
         return this;
     }
 
