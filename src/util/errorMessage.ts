@@ -17,9 +17,10 @@ export class errorMessage {
  * a simple class to contain an error message and related data
  * @param msg error message
  * @param ephemeral (default=true)
+ * @param noShim (defualt=false) skip the shim
  * @returns new errorMessage
  */
-export const emsg = (msg: string, ephemeral = true) => new errorMessage(emsgShim ? emsgShim.get(`error.${msg}`) : msg, ephemeral);
+export const emsg = (msg: string, ephemeral = true, noShim = false) => new errorMessage(emsgShim && !noShim ? emsgShim.get(`error.${msg}`) : msg, ephemeral);
 
 /**
  * @param shim probably `Lang` (github:ZomoXYZ/lang)

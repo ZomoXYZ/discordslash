@@ -66,7 +66,7 @@ function _initClient(client: Client<true>) {
             var commandsFound = Commands.get(interaction.commandName);
 
             if (!commandsFound) {
-                throw emsg(`Command ${interaction.commandName} not found`);
+                throw emsg(`Command ${interaction.commandName} not found`, true, true);
             }
 
             await commandsFound(interaction as CommandInteraction);
