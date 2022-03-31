@@ -1,3 +1,5 @@
+var emsgShim: null | {get: (str: string) => string} = null;
+
 /**
  * use the emsg() function instead
  */
@@ -17,5 +19,9 @@ export class errorMessage {
  * @param ephemeral (default=true)
  * @returns new errorMessage
  */
-// export const emsg = (msg: string, ephemeral = true) => new errorMessage(Lang.get(`error.${msg}`), ephemeral);
-export const emsg = (msg: string, ephemeral = true) => new errorMessage(msg, ephemeral);
+export const emsg = (msg: string, ephemeral = true) => new errorMessage(emsgShim ? emsgShim.get(`error.${msg}`) : msg, ephemeral);
+
+/**
+ * @param shim probably `Lang` (github:ZomoXYZ/lang)
+ */
+export const setEmsgShim = (shim: {get: (str: string) => string}) => emsgShim = shim;

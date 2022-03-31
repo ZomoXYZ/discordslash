@@ -1,12 +1,12 @@
 import { Client, CommandInteraction } from "discord.js";
 import { Command, CommandRunnable } from "./types/commands";
-import { emsg, errorMessage } from "./util/errorMessage";
+import { emsg, errorMessage, setEmsgShim } from "./util/errorMessage";
 import { normalizeOption, optionsType } from "./util/normalizeOption";
 import { CommandGenerator } from "./generator/command";
 import { CommandOptionGenerator } from "./generator/option";
 import { registerCommands } from "./register";
 
-export { emsg, errorMessage };
+export { emsg, errorMessage, setEmsgShim };
 export * from './types/commands';
 
 const CommandsRaw: Command[] = [],
