@@ -1,5 +1,5 @@
-import { Client, CommandInteraction, Intents } from 'discord.js';
-import { addCommand, CommandGenerator, CommandOptionGenerator, initClient } from '..';
+import { Client, CommandInteraction } from 'discord.js';
+import { addCommand, CommandGenerator, initClient } from '..';
 
 const EightBallAnswers = [
     'It is certain',
@@ -12,7 +12,7 @@ const EightBallAnswers = [
     'Outlook good',
     'Yes',
     'Signs point to yes',
-    'Don\'t count on it',
+    "Don't count on it",
     'My reply is no',
     'My sources say no',
     'Outlook not so good',
@@ -21,55 +21,54 @@ const EightBallAnswers = [
     'Ask again later',
     'Better not tell you now',
     'Cannot predict now',
-    'Concentrate and ask again'
+    'Concentrate and ask again',
 ];
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+const client = new Client({ intents: ['Guilds'] });
 
 initClient(client);
 
 addCommand([
     new CommandGenerator()
         .setName('ping')
-        .setDescription('ping me')
-        .setRun((interaction: CommandInteraction) =>
-            interaction.reply('pong')),
-            
+        .setDescription('ping me!')
+        .setRun((interaction: CommandInteraction) => interaction.reply('pong')),
+
     new CommandGenerator()
         .setName('8ball')
         .setDescription('ask the magic 8ball a question')
-        .addOption('question', 'string', 'question to ask the 8ball', true)
+        .addOption('question', 'String', 'question to ask the 8ball', true)
         /*
         // this is the same as the line above
         .addOption([
 
             new CommandOptionGenerator()
                 .setName('question')
-                .setType('string')
+                .setType('String')
                 .setDescription('question to ask the 8ball')
                 .setRequired()
 
         ])
         */
-        .setRun(EightBall)
+        .setRun(EightBall),
 ]);
 
 function EightBall(interaction: CommandInteraction) {
-
     let question = interaction.options.get('question', true).value,
-        answer = EightBallAnswers[Math.floor(Math.random() * EightBallAnswers.length)];
+        answer =
+            EightBallAnswers[
+                Math.floor(Math.random() * EightBallAnswers.length)
+            ];
 
     if (typeof question === 'string') {
+        if (!question.endsWith('?')) question += '?';
 
-        if (!question.endsWith('?'))
-            question += '?';
-
-        interaction.reply(`\`${question}\` ${answer}`);
-
+        interaction
+            .reply(`\`${question}\` ${answer}`)
+            .catch((e) => console.error(e));
     }
-
 }
 
-client.on('ready', client => console.log(`Ready ${client.user.tag}`));
+client.on('ready', (client) => console.log(`Ready ${client.user.tag}`));
 
 client.login(TOKEN);

@@ -1,16 +1,30 @@
 const { build } = require('esbuild');
+const readline = require('readline');
 
-const define = {
-    TOKEN: `"${process.argv[2]}"`
-};
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-build({
-    entryPoints: ['examples/main.ts'],
-    outfile: 'examples/main.js',
+rl.question('Enter your token: ', (token) => {
+    rl.close();
 
-    target: 'es6',
-    platform: 'node',
-    format: 'cjs',
+    const define = {
+        TOKEN: `"${token}"`
+    };
 
-    define
+    console.log('Building...');
+
+    build({
+        entryPoints: ['examples/main.ts'],
+        outfile: 'examples/main.js',
+
+        target: 'es6',
+        platform: 'node',
+        format: 'cjs',
+
+        define
+    }).then(() => {
+        console.log('Done!');
+    }).catch((err) => {
+        console.error(err);
+    });
+
 });
