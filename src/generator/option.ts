@@ -1,37 +1,37 @@
-import { ChannelTypes, CommandOption, OptionChoices, OptionTypes, OptionTypesString, OptionTypesStringMap } from "../types/commands";
-import { normalizeOption, optionsType } from "../util/normalizeOption";
+import {
+    APIApplicationCommandOption,
+    APIApplicationCommandOptionChoice,
+    ApplicationCommandOptionType,
+    ChannelType,
+    LocalizationMap,
+} from 'discord.js';
+import { normalizeOption, optionsType } from '../util/normalizeOption';
 
-//TODO functions that use this generator for main OptionTypes
-
-export class CommandOptionGenerator {
-    type: OptionTypes;
-    name: string;
-    description: string;
-    required: boolean;
-    choices: OptionChoices[];
-    options: CommandOption[];
-    channel_types: ChannelTypes[];
+export class CommandOptionGenerator<T = string | number> {
+    type: ApplicationCommandOptionType = ApplicationCommandOptionType.String;
+    name: string = '';
+    name_localizations?: LocalizationMap;
+    description: string = '';
+    description_localizations?: LocalizationMap;
+    required: boolean = false;
+    choices: APIApplicationCommandOptionChoice<T>[] = [];
+    options: APIApplicationCommandOption[] = [];
+    channel_types: ChannelType[] = [];
     min_value?: number;
     max_value?: number;
-    autocomplete: boolean;
+    min_length?: number;
+    max_length?: number;
+    autocomplete: boolean = false;
 
-    constructor() {
-        this.type = OptionTypes.STRING;
-        this.name = "";
-        this.description = "";
-        this.required = false;
-        this.choices = [];
-        this.options = [];
-        this.channel_types = [];
-        this.autocomplete = false;
-    }
-
-    setType(type: OptionTypes | OptionTypesString) {
-
+    setType(
+        type:
+            | ApplicationCommandOptionType
+            | keyof typeof ApplicationCommandOptionType
+    ) {
         if (typeof type === 'number') {
             this.type = type;
         } else {
-            this.type = OptionTypesStringMap[type];
+            this.type = ApplicationCommandOptionType[type];
         }
 
         return this;
@@ -40,8 +40,16 @@ export class CommandOptionGenerator {
         this.name = name;
         return this;
     }
+    setNameLocalizations(localizations: LocalizationMap) {
+        this.name_localizations = localizations;
+        return this;
+    }
     setDescription(description: string) {
         this.description = description;
+        return this;
+    }
+    setDescriptionLocalizations(localizations: LocalizationMap) {
+        this.description_localizations = localizations;
         return this;
     }
     setRequired() {
@@ -55,16 +63,20 @@ export class CommandOptionGenerator {
      * addChoice(name: string, value: string|number)
      * ```
      */
-    addChoice(arg1: OptionChoices | OptionChoices[] | string, arg2?: string|number) {
-        if (typeof arg1 === "string") {
-            
+    addChoice(
+        arg1:
+            | APIApplicationCommandOptionChoice<T>
+            | APIApplicationCommandOptionChoice<T>[]
+            | string,
+        arg2?: T
+    ) {
+        if (typeof arg1 === 'string') {
             if (arg2 !== undefined) {
                 this.choices.push({
                     name: arg1,
-                    value: arg2
+                    value: arg2,
                 });
             }
-
         } else {
             this.choices.push(...normalizeOption(arg1));
         }
@@ -77,17 +89,37 @@ export class CommandOptionGenerator {
      * addOption(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number)
      * ```
      */
-    addOption(options: optionsType<CommandOption, CommandOptionGenerator>|string, type?: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
+    addOption(
+        options:
+            | optionsType<APIApplicationCommandOption, CommandOptionGenerator>
+            | string,
+        type?:
+            | ApplicationCommandOptionType
+            | keyof typeof ApplicationCommandOptionType,
+        description?: string,
+        required?: boolean,
+        min_value?: number,
+        max_value?: number
+    ) {
         if (typeof options === 'string') {
             if (type !== undefined) {
-                this.options.push(CommandOpt(options, type, description, required, min_value, max_value));
+                this.options.push(
+                    CommandOpt(
+                        options,
+                        type,
+                        description,
+                        required,
+                        min_value,
+                        max_value
+                    )
+                );
             }
         } else {
             this.options.push(...normalizeOption(options));
         }
         return this;
     }
-    setChannelTypes(channel_types: ChannelTypes[]) {
+    setChannelTypes(channel_types: ChannelType[]) {
         this.channel_types = channel_types;
         return this;
     }
@@ -104,7 +136,7 @@ export class CommandOptionGenerator {
         return this;
     }
 
-    toJson(): CommandOption {
+    toJson(): APIApplicationCommandOption {
         return {
             type: this.type,
             name: this.name,
@@ -115,24 +147,26 @@ export class CommandOptionGenerator {
             channel_types: this.channel_types,
             min_value: this.min_value,
             max_value: this.max_value,
-            autocomplete: this.autocomplete
-        }
+            autocomplete: this.autocomplete,
+        } as APIApplicationCommandOption;
     }
-
 }
-export function CommandOpt(name: string, type: OptionTypes|OptionTypesString, description?: string, required?: boolean, min_value?: number, max_value?: number) {
-    let option = new CommandOptionGenerator()
-        .setName(name)
-        .setType(type)
+export function CommandOpt(
+    name: string,
+    type:
+        | ApplicationCommandOptionType
+        | keyof typeof ApplicationCommandOptionType,
+    description?: string,
+    required?: boolean,
+    min_value?: number,
+    max_value?: number
+): APIApplicationCommandOption {
+    let option = new CommandOptionGenerator().setName(name).setType(type);
 
-    if (description)
-        option.setDescription(description)
-    if (required)
-        option.setRequired()
-    if (min_value)
-        option.setMinValue(min_value)
-    if (max_value)
-        option.setMaxValue(max_value);
+    if (description) option.setDescription(description);
+    if (required) option.setRequired();
+    if (min_value) option.setMinValue(min_value);
+    if (max_value) option.setMaxValue(max_value);
 
-    return option;
+    return option.toJson();
 }

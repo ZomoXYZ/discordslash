@@ -1,5 +1,5 @@
 import { Client, CommandInteraction } from 'discord.js';
-import { Command, CommandRunnable } from './types/commands';
+import { CommandRunnable, POSTAPIApplicationCommand } from './types/commands';
 import { emsg, errorMessage, setEmsgShim } from './util/errorMessage';
 import { normalizeOption, optionsType } from './util/normalizeOption';
 import { CommandGenerator } from './generator/command';
@@ -11,7 +11,7 @@ export * from './types/commands';
 
 export { CommandGenerator, CommandOptionGenerator };
 
-const CommandsRaw: Command[] = [],
+const CommandsRaw: POSTAPIApplicationCommand[] = [],
     Commands: Map<
         string,
         (interaction: CommandInteraction) => void | Promise<void>
@@ -30,7 +30,9 @@ export function addCommand(
     CommandsRaw.push(...commands);
 
     commands_n.forEach((c) => {
-        Commands.set(c.name, c.run);
+        let name = c.name;
+        if (c.guild_id) name += `-${c.guild_id}`;
+        Commands.set(name, c.run);
     });
 
     if (ClientReady) {
@@ -39,26 +41,35 @@ export function addCommand(
 }
 
 //command execution
-export function initClient(client: Client) {
+export function initClient(client: Client, forceRegister = false) {
     //client isn't ready
-    if (client.readyAt !== null) _initClient(client);
-    else client.once('ready', (clientReady) => _initClient(clientReady));
+    if (client.readyAt !== null) _initClient(client, forceRegister);
+    else
+        client.once('ready', (clientReady) =>
+            _initClient(clientReady, forceRegister)
+        );
 }
 
-function _initClient(client: Client<true>) {
+function _initClient(client: Client<true>, forceRegister = false) {
     ClientReady = true;
     ClientToken = client.token;
     ClientID = client.user.id;
 
-    registerCommands(CommandsRaw, ClientToken, ClientID);
+    registerCommands(CommandsRaw, ClientToken, ClientID, forceRegister);
 
     client.on('interactionCreate', async (interaction) => {
         if (!interaction.isCommand()) return;
 
         try {
-            var commandsFound = Commands.get(interaction.commandName);
+            var commandFound = Commands.get(interaction.commandName);
+            if (interaction.guild) {
+                let guildCommand = Commands.get(
+                    `${interaction.commandName}-${interaction.guild.id}`
+                );
+                if (guildCommand) commandFound = guildCommand;
+            }
 
-            if (!commandsFound) {
+            if (commandFound === undefined) {
                 throw emsg(
                     `Command ${interaction.commandName} not found`,
                     true,
@@ -66,7 +77,7 @@ function _initClient(client: Client<true>) {
                 );
             }
 
-            await commandsFound(interaction as CommandInteraction);
+            await commandFound(interaction as CommandInteraction);
         } catch (e) {
             if (e instanceof errorMessage) {
                 if (interaction.deferred || interaction.replied)

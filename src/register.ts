@@ -1,45 +1,41 @@
-import { Command } from "./types/commands";
 import { REST } from '@discordjs/rest';
-import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
-import { findInArray } from "./util/array";
+import { Routes } from 'discord-api-types/v10';
+import { POSTAPIApplicationCommand } from './types/commands';
+import { compareObjects } from './util/general';
 
-export async function registerCommands(commands: Command[], token: string, clientID: string) {
-
+export async function registerCommands(
+    commands: POSTAPIApplicationCommand[],
+    token: string,
+    clientID: string,
+    forceRegister = false
+) {
     const rest = new REST({ version: '10' }).setToken(token),
-        commandsToRegister = await checkCommands(commands, rest, clientID);
+        toRegister =
+            forceRegister || (await checkCommands(commands, rest, clientID));
 
-    await rest.put(
-        Routes.applicationCommands(clientID),
-        { body: commandsToRegister }
-    );
-    
+    if (toRegister) {
+        await rest.put(Routes.applicationCommands(clientID), {
+            body: commands,
+        });
+    }
 }
 
-const str = (s: string) => s.replace(/\n/g, '');
-
-async function checkCommands(commandsOrig: Command[], rest: REST, clientID: string) {
-
-    let commands = commandsOrig;
-    
-    let foundCommands = await rest.get(
+async function checkCommands(
+    commands: POSTAPIApplicationCommand[],
+    rest: REST,
+    clientID: string
+): Promise<boolean> {
+    let foundCommands = (await rest.get(
         Routes.applicationCommands(clientID)
-    ) as APIApplicationCommand[];
+    )) as POSTAPIApplicationCommand[];
 
-    foundCommands.forEach((foundCmd: APIApplicationCommand) => {
-
-        let { data, index } = findInArray(commands, cmd => cmd.name === foundCmd.name),
-            cmd = data as Command;
-
-        // if the command exists and is the same, delete from list
-        // @ts-ignore ts(2367)
-        if (cmd && str(cmd.description) === str(foundCmd.description) && cmd.type === foundCmd.type && cmd.default_permission === foundCmd.default_permission) {
-            commands.splice(index, 1);
+    return commands.every((cmd) => {
+        const foundCmd = foundCommands.find(
+            (fCmd) => cmd.name === fCmd.name && cmd.guild_id === fCmd.guild_id
+        );
+        if (cmd && compareObjects(cmd, foundCmd, [['dm_permission', true]])) {
+            return true;
         }
-
+        return false;
     });
-
-    commands.forEach(cmd => console.log(`Registering command ${cmd.name}`));
-
-    return commands;
-
 }
