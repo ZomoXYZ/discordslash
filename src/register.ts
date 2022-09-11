@@ -9,13 +9,15 @@ export async function registerCommands(
     clientID: string,
     forceRegister = false
 ) {
+    if (commands.length === 0) {
+        return;
+    }
     const rest = new REST({ version: '10' }).setToken(token),
         toRegister =
             forceRegister || (await shouldRegister(commands, rest, clientID));
 
     if (toRegister) {
         console.log('Registering application commands...');
-        console.log(JSON.stringify(commands, null, 2));
         await rest.put(Routes.applicationCommands(clientID), {
             body: commands,
         });
