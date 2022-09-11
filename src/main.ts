@@ -1,5 +1,10 @@
 import { Client, CommandInteraction } from 'discord.js';
-import { CommandRunnable, POSTAPIApplicationCommand } from './types/commands';
+import {
+    CommandOptionRunnable,
+    CommandRunnable,
+    POSTAPIApplicationCommand,
+    POSTAPIApplicationCommandOption,
+} from './types/commands';
 import { emsg, errorMessage, setEmsgShim } from './util/errorMessage';
 import { normalizeOption, optionsType } from './util/normalizeOption';
 import { CommandGenerator } from './generator/command';
@@ -10,16 +15,47 @@ export { emsg, errorMessage, setEmsgShim };
 export * from './types/commands';
 
 export { CommandGenerator, CommandOptionGenerator };
+type CommandFn = (interaction: CommandInteraction) => void | Promise<void>;
 
-const CommandsRaw: POSTAPIApplicationCommand[] = [],
-    Commands: Map<
-        string,
-        (interaction: CommandInteraction) => void | Promise<void>
-    > = new Map();
+const CommandsRaw: POSTAPIApplicationCommand[] = [];
+
+/**
+ * key: command split by '-'
+ *
+ *     key example: 'command'
+ *                  'command-subcommand'
+ *                  'guildID-command'
+ *                  'guildID-command-subcommand'
+ */
+const Commands: Map<string, CommandFn> = new Map();
 
 var ClientReady = false,
     ClientToken = '',
     ClientID = '';
+
+function setCommandsLoop(
+    options: (CommandRunnable | CommandOptionRunnable)[],
+    key: string[] = [],
+    guild?: string
+) {
+    for (const option of options) {
+        let newkey = [...key, option.name];
+        if ('guild_id' in option) {
+            guild = option.guild_id;
+        }
+        let optionName = newkey.join('-');
+        if (guild !== undefined) {
+            optionName = `${guild}-${optionName}`;
+        }
+        if (option.run !== undefined) {
+            Commands.set(optionName, option.run);
+        } else {
+        }
+        if (option.options) {
+            setCommandsLoop(option.options, newkey);
+        }
+    }
+}
 
 export function addCommand(
     commandRaw: optionsType<CommandRunnable, CommandGenerator>
@@ -28,12 +64,7 @@ export function addCommand(
         commands_n = normalizeOption(commandRaw, 'toJsonRunnable');
 
     CommandsRaw.push(...commands);
-
-    commands_n.forEach((c) => {
-        let name = c.name;
-        if (c.guild_id) name += `-${c.guild_id}`;
-        Commands.set(name, c.run);
-    });
+    setCommandsLoop(commands_n);
 
     if (ClientReady) {
         registerCommands(CommandsRaw, ClientToken, ClientID);
@@ -43,11 +74,13 @@ export function addCommand(
 //command execution
 export function initClient(client: Client, forceRegister = false) {
     //client isn't ready
-    if (client.readyAt !== null) _initClient(client, forceRegister);
-    else
+    if (client.readyAt !== null) {
+        _initClient(client, forceRegister);
+    } else {
         client.once('ready', (clientReady) =>
             _initClient(clientReady, forceRegister)
         );
+    }
 }
 
 function _initClient(client: Client<true>, forceRegister = false) {
@@ -58,24 +91,16 @@ function _initClient(client: Client<true>, forceRegister = false) {
     registerCommands(CommandsRaw, ClientToken, ClientID, forceRegister);
 
     client.on('interactionCreate', async (interaction) => {
-        if (!interaction.isCommand()) return;
+        if (!interaction.isChatInputCommand()) return;
 
         try {
-            var commandFound = Commands.get(interaction.commandName);
-            if (interaction.guild) {
-                let guildCommand = Commands.get(
-                    `${interaction.commandName}-${interaction.guild.id}`
-                );
-                if (guildCommand) commandFound = guildCommand;
-            }
+            var commandFound = getRun(
+                [interaction.commandName, interaction.options.getSubcommand()],
+                interaction.guild?.id
+            );
 
-            if (commandFound === undefined) {
+            if (commandFound === null) {
                 return;
-                // throw emsg(
-                //     `Command ${interaction.commandName} not found`,
-                //     true,
-                //     true
-                // );
             }
 
             await commandFound(interaction as CommandInteraction);
@@ -87,4 +112,27 @@ function _initClient(client: Client<true>, forceRegister = false) {
             } else console.error(e);
         }
     });
+}
+
+function getRun(
+    commandOrig: (string | null | undefined)[],
+    guild?: string | null
+): CommandFn | null {
+    const command = commandOrig.filter(
+        (c) => c !== null && c !== undefined
+    ) as string[];
+    let commandName = command.join('-');
+    let fn = Commands.get(commandName);
+    if (guild !== null && guild !== undefined) {
+        let guildCommand = Commands.get(`${guild}-${commandName}`);
+        if (guildCommand) fn = guildCommand;
+    }
+    if (fn === undefined) {
+        if (command.length === 1) {
+            return null;
+        } else {
+            return getRun(command.slice(0, command.length - 1), guild);
+        }
+    }
+    return fn;
 }

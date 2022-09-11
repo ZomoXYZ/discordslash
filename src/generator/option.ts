@@ -1,10 +1,15 @@
 import {
-    APIApplicationCommandOption,
     APIApplicationCommandOptionChoice,
     ApplicationCommandOptionType,
     ChannelType,
     LocalizationMap,
 } from 'discord.js';
+import {
+    CommandOptionRunnable,
+    CommandRunnable,
+    CommandRunnableFn,
+    POSTAPIApplicationCommandOption,
+} from '../types/commands';
 import { normalizeOption, optionsType } from '../util/normalizeOption';
 
 export class CommandOptionGenerator<T = string | number> {
@@ -15,13 +20,14 @@ export class CommandOptionGenerator<T = string | number> {
     description_localizations?: LocalizationMap;
     required: boolean = false;
     choices: APIApplicationCommandOptionChoice<T>[] = [];
-    options: APIApplicationCommandOption[] = [];
+    options: CommandOptionRunnable[] = [];
     channel_types: ChannelType[] = [];
     min_value?: number;
     max_value?: number;
     min_length?: number;
     max_length?: number;
     autocomplete: boolean = false;
+    run: CommandRunnableFn = () => {};
 
     setType(
         type:
@@ -91,7 +97,10 @@ export class CommandOptionGenerator<T = string | number> {
      */
     addOption(
         options:
-            | optionsType<APIApplicationCommandOption, CommandOptionGenerator>
+            | optionsType<
+                  POSTAPIApplicationCommandOption,
+                  CommandOptionGenerator
+              >
             | string,
         type?:
             | ApplicationCommandOptionType
@@ -136,7 +145,12 @@ export class CommandOptionGenerator<T = string | number> {
         return this;
     }
 
-    toJson(): APIApplicationCommandOption {
+    setRun(fn: CommandRunnableFn) {
+        this.run = fn;
+        return this;
+    }
+
+    toJson(): POSTAPIApplicationCommandOption<T> {
         return {
             type: this.type,
             name: this.name,
@@ -148,9 +162,17 @@ export class CommandOptionGenerator<T = string | number> {
             min_value: this.min_value,
             max_value: this.max_value,
             autocomplete: this.autocomplete,
-        } as APIApplicationCommandOption;
+        };
+    }
+
+    toJsonRunnable(): CommandOptionRunnable<T> {
+        return {
+            ...this.toJson(),
+            run: this.run,
+        };
     }
 }
+
 export function CommandOpt(
     name: string,
     type:
@@ -160,7 +182,7 @@ export function CommandOpt(
     required?: boolean,
     min_value?: number,
     max_value?: number
-): APIApplicationCommandOption {
+): POSTAPIApplicationCommandOption {
     let option = new CommandOptionGenerator().setName(name).setType(type);
 
     if (description) option.setDescription(description);

@@ -1,7 +1,7 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
 import { POSTAPIApplicationCommand } from './types/commands';
-import { compareObjects } from './util/general';
+import { compareValues } from './util/general';
 
 export async function registerCommands(
     commands: POSTAPIApplicationCommand[],
@@ -11,16 +11,17 @@ export async function registerCommands(
 ) {
     const rest = new REST({ version: '10' }).setToken(token),
         toRegister =
-            forceRegister || (await checkCommands(commands, rest, clientID));
+            forceRegister || (await shouldRegister(commands, rest, clientID));
 
     if (toRegister) {
         await rest.put(Routes.applicationCommands(clientID), {
             body: commands,
         });
+        console.log('Successfully registered application commands.');
     }
 }
 
-async function checkCommands(
+async function shouldRegister(
     commands: POSTAPIApplicationCommand[],
     rest: REST,
     clientID: string
@@ -29,13 +30,11 @@ async function checkCommands(
         Routes.applicationCommands(clientID)
     )) as POSTAPIApplicationCommand[];
 
-    return commands.every((cmd) => {
+    return commands.some((cmd) => {
         const foundCmd = foundCommands.find(
             (fCmd) => cmd.name === fCmd.name && cmd.guild_id === fCmd.guild_id
         );
-        if (cmd && compareObjects(cmd, foundCmd, [['dm_permission', true]])) {
-            return true;
-        }
-        return false;
+        const compare = compareValues(cmd, foundCmd, ['dm_permission']);
+        return !compare;
     });
 }

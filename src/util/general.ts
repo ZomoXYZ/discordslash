@@ -1,63 +1,60 @@
 import { PermissionFlagsBits, PermissionsString } from 'discord.js';
 
-/** will compare obj2 to obj1, obj2 may extend obj1 */
-export function compareObjects(
-    obj1: any,
-    obj2: any,
-    defaultValue: [key: string, val: any][] = [], //intentionally not a map so "." can be used
+/** will compare val2 to val1, if they are objects, val2 may extend val1
+ * @param defaultTrue list of keys that should be true by default if they don't exist (nonexistent keys equate to false so there is no reason to include them)
+ */
+export function compareValues(
+    val1: any,
+    val2: any,
+    defaultTrue: string[] = [],
     _KEY: string[] = []
-): boolean {
-    for (let key of Object.keys(obj1)) {
-        const WholeKey = _KEY.concat(key);
-        // loose false comparison
-        const val1 = obj1[key],
-            val2 = obj2[key];
-
-        if (
-            val1 &&
-            val2 &&
-            typeof val1 === 'object' &&
-            typeof val2 === 'object'
-        ) {
-            if (!compareObjects(val1, val2, defaultValue, WholeKey)) {
-                return false;
-            }
-        } else if (val1 !== val2) {
-            let bool1 = Boolean(val1),
-                bool2 = Boolean(val2);
-
-            if (bool1 && typeof val1 === 'object') {
-                bool1 = Object.keys(val1).length > 0;
-            }
-            if (bool2 && typeof val2 === 'object') {
-                bool2 = Object.keys(val2).length > 0;
-            }
-
-            if (!bool1) {
-                let def = defaultValue.find((v) => v[0] === WholeKey.join('.'));
-                if (def) {
-                    bool1 = def[1];
-                }
-            }
-            if (!bool2) {
-                let def = defaultValue.find((v) => v[0] === WholeKey.join('.'));
-                if (def) {
-                    bool2 = def[1];
-                }
-            }
-
-            if (bool1 !== bool2) {
-                let keystr = WholeKey.join('.'),
-                    val1str = JSON.stringify(val1),
-                    val2str = JSON.stringify(val2);
-                console.log(
-                    `compareObjects (${keystr}): different value; ${val1str} (${bool1}) !== ${val2str} (${bool2})`
-                );
-                return false;
-            }
-        }
+) {
+    if (typeof val1 !== typeof val2) {
+        return false;
     }
 
+    if (typeof val1 === 'object') {
+        if (Array.isArray(val1) !== Array.isArray(val2)) return false;
+
+        for (let key of Object.keys(val1)) {
+            if (!looseBoolean(val1[key])) continue;
+
+            if (!(key in val2)) return false;
+
+            const WholeKey = _KEY.concat(key);
+            const compare = compareValues(
+                val1[key],
+                val2[key],
+                defaultTrue,
+                WholeKey
+            );
+            if (!compare) return false;
+        }
+    } else {
+        let bool1 = looseBoolean(val1),
+            bool2 = looseBoolean(val2);
+
+        if (val1 === undefined || val1 === null) {
+            if (defaultTrue.includes(_KEY.join('.'))) {
+                bool1 = true;
+            }
+        }
+        if (val2 === undefined || val2 === null) {
+            if (defaultTrue.includes(_KEY.join('.'))) {
+                bool2 = true;
+            }
+        }
+
+        if (bool1 !== bool2) return false;
+    }
+
+    return true;
+}
+
+export function looseBoolean(value: any): boolean {
+    const bool = Boolean(value);
+    if (!bool) return false;
+    if (Object.keys(value).length === 0) return false;
     return true;
 }
 

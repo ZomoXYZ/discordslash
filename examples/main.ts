@@ -1,5 +1,10 @@
 import { Client, CommandInteraction } from 'discord.js';
-import { addCommand, CommandGenerator, initClient } from '..';
+import {
+    addCommand,
+    CommandGenerator,
+    CommandOptionGenerator,
+    initClient,
+} from '..';
 
 const EightBallAnswers = [
     'It is certain',
@@ -35,22 +40,35 @@ addCommand([
         .setRun((interaction: CommandInteraction) => interaction.reply('pong')),
 
     new CommandGenerator()
-        .setName('8ball')
-        .setDescription('ask the magic 8ball a question')
-        .addOption('question', 'String', 'question to ask the 8ball', true)
-        /*
-        // this is the same as the line above
-        .addOption([
-
+        .setName('fun')
+        .setDescription('fun commands')
+        .addOption(
             new CommandOptionGenerator()
-                .setName('question')
-                .setType('String')
-                .setDescription('question to ask the 8ball')
-                .setRequired()
-
-        ])
-        */
-        .setRun(EightBall),
+                .setName('8ball')
+                .setDescription('ask the magic 8ball a question')
+                .setType('Subcommand')
+                .addOption(
+                    'question',
+                    'String',
+                    'question to ask the 8ball',
+                    true
+                )
+                /*
+                // this is the same as the line above
+                .addOption(
+                    new CommandOptionGenerator()
+                        .setName('question')
+                        .setType('String')
+                        .setDescription('question to ask the 8ball')
+                        .setRequired()
+                )
+                */
+                .setRun(EightBall)
+        )
+        // because there is a subcommand, this will never be run
+        .setRun((interaction: CommandInteraction) =>
+            interaction.reply('You ran the fun command!')
+        ),
 ]);
 
 function EightBall(interaction: CommandInteraction) {

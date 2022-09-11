@@ -1,5 +1,4 @@
 import {
-    APIApplicationCommandOption,
     ApplicationCommandOptionType,
     ApplicationCommandType,
     LocalizationMap,
@@ -9,10 +8,10 @@ import {
     CommandRunnableFn,
     CommandRunnable,
     POSTAPIApplicationCommand,
+    CommandOptionRunnable,
 } from '../types/commands';
 import { normalizeOption, optionsType } from '../util/normalizeOption';
 import { CommandOpt, CommandOptionGenerator } from './option';
-import { createHash } from 'crypto';
 import { BitfieldToString } from '../util/general';
 
 export class CommandGenerator {
@@ -22,7 +21,7 @@ export class CommandGenerator {
     name_localizations?: LocalizationMap;
     description?: string;
     description_localizations?: LocalizationMap;
-    options: APIApplicationCommandOption[] = [];
+    options: CommandOptionRunnable[] = [];
     default_member_permissions?: string;
     dm_permission?: boolean;
     run: CommandRunnableFn = () => {};
@@ -65,7 +64,7 @@ export class CommandGenerator {
      */
     addOption(
         options:
-            | optionsType<APIApplicationCommandOption, CommandOptionGenerator>
+            | optionsType<CommandOptionRunnable, CommandOptionGenerator>
             | string,
         type?:
             | ApplicationCommandOptionType
@@ -77,19 +76,19 @@ export class CommandGenerator {
     ) {
         if (typeof options === 'string') {
             if (type !== undefined) {
-                this.options.push(
-                    CommandOpt(
-                        options,
-                        type,
-                        description,
-                        required,
-                        min_value,
-                        max_value
-                    )
+                const opt = CommandOpt(
+                    options,
+                    type,
+                    description,
+                    required,
+                    min_value,
+                    max_value
                 );
+                this.options.push(opt);
             }
         } else {
-            this.options.push(...normalizeOption(options));
+            const opts = normalizeOption(options, 'toJsonRunnable');
+            this.options.push(...opts);
         }
         return this;
     }
@@ -109,22 +108,15 @@ export class CommandGenerator {
         return this;
     }
 
-    getID() {
-        const command = {
-            name: this.name,
-            description: this.description,
-            options: this.options,
-            dm_permission: this.dm_permission,
-            default_member_permissions: this.default_member_permissions,
-            type: this.type,
-        };
-        const hash = createHash('md5')
-            .update(JSON.stringify(command))
-            .digest('hex');
-        const hex = hash.slice(Math.max(0, hash.length - 12));
-        const num = parseInt(hex, 16).toString();
-        return num.slice(Math.max(0, num.length - 16));
-    }
+    // getID() {
+    //     const command = this.toJson();
+    //     const hash = createHash('md5')
+    //         .update(JSON.stringify(command))
+    //         .digest('hex');
+    //     const hex = hash.slice(Math.max(0, hash.length - 12));
+    //     const num = parseInt(hex, 16).toString();
+    //     return num.slice(Math.max(0, num.length - 16));
+    // }
 
     toJson(): POSTAPIApplicationCommand {
         return {
@@ -139,13 +131,8 @@ export class CommandGenerator {
 
     toJsonRunnable(): CommandRunnable {
         return {
-            name: this.name,
-            description: this.description,
-            options: this.options,
-            dm_permission: this.dm_permission,
-            default_member_permissions: this.default_member_permissions,
-            type: this.type,
+            ...this.toJson(),
             run: this.run,
-        } as CommandRunnable;
+        };
     }
 }
