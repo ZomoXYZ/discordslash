@@ -70,11 +70,12 @@ function _initClient(client: Client<true>, forceRegister = false) {
             }
 
             if (commandFound === undefined) {
-                throw emsg(
-                    `Command ${interaction.commandName} not found`,
-                    true,
-                    true
-                );
+                return;
+                // throw emsg(
+                //     `Command ${interaction.commandName} not found`,
+                //     true,
+                //     true
+                // );
             }
 
             await commandFound(interaction as CommandInteraction);
