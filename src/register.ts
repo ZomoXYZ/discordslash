@@ -14,6 +14,8 @@ export async function registerCommands(
             forceRegister || (await shouldRegister(commands, rest, clientID));
 
     if (toRegister) {
+        console.log('Registering application commands...');
+        console.log(JSON.stringify(commands, null, 2));
         await rest.put(Routes.applicationCommands(clientID), {
             body: commands,
         });
