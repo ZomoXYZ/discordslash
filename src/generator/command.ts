@@ -87,7 +87,11 @@ export class CommandGenerator {
                 this.options.push(opt);
             }
         } else {
-            const opts = normalizeOption(options, 'toJsonRunnable');
+            const opts = normalizeOption(
+                options,
+                CommandOptionGenerator,
+                'toJsonRunnable'
+            );
             this.options.push(...opts);
         }
         return this;
@@ -107,16 +111,6 @@ export class CommandGenerator {
         this.run = fn;
         return this;
     }
-
-    // getID() {
-    //     const command = this.toJson();
-    //     const hash = createHash('md5')
-    //         .update(JSON.stringify(command))
-    //         .digest('hex');
-    //     const hex = hash.slice(Math.max(0, hash.length - 12));
-    //     const num = parseInt(hex, 16).toString();
-    //     return num.slice(Math.max(0, num.length - 16));
-    // }
 
     toJson(): POSTAPIApplicationCommand {
         return {

@@ -33,42 +33,55 @@ const client = new Client({ intents: ['Guilds'] });
 
 initClient(client);
 
+// any argument that accepts a generator can accept the following: raw json, generator, or a function that returns a generator, or an array that contans any of these
+//  this includes: addCommand, addOption, and addChoice
+
 addCommand([
+    //raw json
+    {
+        type: 1,
+        name: 'hi',
+        description: 'Say hi to the bot',
+        run: (interaction) => interaction.reply('hi!'),
+    },
+
+    //with generator
     new CommandGenerator()
         .setName('ping')
         .setDescription('ping me!')
         .setRun((interaction: CommandInteraction) => interaction.reply('pong')),
 
-    new CommandGenerator()
-        .setName('fun')
-        .setDescription('fun commands')
-        .addOption(
-            new CommandOptionGenerator()
-                .setName('8ball')
-                .setDescription('ask the magic 8ball a question')
-                .setType('Subcommand')
-                .addOption(
-                    'question',
-                    'String',
-                    'question to ask the 8ball',
-                    true
-                )
-                /*
-                // this is the same as the line above
-                .addOption(
-                    new CommandOptionGenerator()
-                        .setName('question')
-                        .setType('String')
-                        .setDescription('question to ask the 8ball')
-                        .setRequired()
-                )
-                */
-                .setRun(EightBall)
-        )
-        // because there is a subcommand, this will never be run
-        .setRun((interaction: CommandInteraction) =>
-            interaction.reply('You ran the fun command!')
-        ),
+    //with generator from function
+    (cmd) =>
+        cmd
+            .setName('fun')
+            .setDescription('fun commands')
+            .addOption((opt) =>
+                opt
+                    .setName('8ball')
+                    .setDescription('ask the magic 8ball a question')
+                    .setType('Subcommand')
+                    .addOption(
+                        'question',
+                        'String',
+                        'question to ask the 8ball',
+                        true
+                    )
+                    /* this is the same as the method above
+                    .addOption(
+                        new CommandOptionGenerator()
+                            .setName('question')
+                            .setType('String')
+                            .setDescription('question to ask the 8ball')
+                            .setRequired()
+                    )
+                    */
+                    .setRun(EightBall)
+            )
+            // because there is a subcommand, this will never be run
+            .setRun((interaction: CommandInteraction) =>
+                interaction.reply('you ran the fun command!')
+            ),
 ]);
 
 function EightBall(interaction: CommandInteraction) {

@@ -6,20 +6,20 @@ import {
 } from 'discord.js';
 import {
     CommandOptionRunnable,
-    CommandRunnable,
     CommandRunnableFn,
     POSTAPIApplicationCommandOption,
 } from '../types/commands';
 import { normalizeOption, optionsType } from '../util/normalizeOption';
+import { CommandChoiceGenerator } from './choice';
 
-export class CommandOptionGenerator<T = string | number> {
+export class CommandOptionGenerator {
     type: ApplicationCommandOptionType = ApplicationCommandOptionType.String;
     name: string = '';
     name_localizations?: LocalizationMap;
     description: string = '';
     description_localizations?: LocalizationMap;
     required: boolean = false;
-    choices: APIApplicationCommandOptionChoice<T>[] = [];
+    choices: APIApplicationCommandOptionChoice[] = [];
     options: CommandOptionRunnable[] = [];
     channel_types: ChannelType[] = [];
     min_value?: number;
@@ -71,10 +71,12 @@ export class CommandOptionGenerator<T = string | number> {
      */
     addChoice(
         arg1:
-            | APIApplicationCommandOptionChoice<T>
-            | APIApplicationCommandOptionChoice<T>[]
+            | optionsType<
+                  APIApplicationCommandOptionChoice,
+                  CommandChoiceGenerator
+              >
             | string,
-        arg2?: T
+        arg2?: string | number
     ) {
         if (typeof arg1 === 'string') {
             if (arg2 !== undefined) {
@@ -84,7 +86,7 @@ export class CommandOptionGenerator<T = string | number> {
                 });
             }
         } else {
-            this.choices.push(...normalizeOption(arg1));
+            this.choices.push(...normalizeOption(arg1, CommandChoiceGenerator));
         }
         return this;
     }
@@ -124,7 +126,9 @@ export class CommandOptionGenerator<T = string | number> {
                 );
             }
         } else {
-            this.options.push(...normalizeOption(options));
+            this.options.push(
+                ...normalizeOption(options, CommandOptionGenerator)
+            );
         }
         return this;
     }
@@ -150,7 +154,7 @@ export class CommandOptionGenerator<T = string | number> {
         return this;
     }
 
-    toJson(): POSTAPIApplicationCommandOption<T> {
+    toJson(): POSTAPIApplicationCommandOption {
         return {
             type: this.type,
             name: this.name,
@@ -165,7 +169,7 @@ export class CommandOptionGenerator<T = string | number> {
         };
     }
 
-    toJsonRunnable(): CommandOptionRunnable<T> {
+    toJsonRunnable(): CommandOptionRunnable {
         return {
             ...this.toJson(),
             run: this.run,

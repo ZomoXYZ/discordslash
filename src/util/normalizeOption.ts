@@ -1,6 +1,8 @@
 type JsonObject = { [key: string]: any };
 
-export type optionsType<T, U> = T | U | (T | U)[];
+type FnSelf<T> = (fn: T) => T;
+export type optionsTypePart<T, U> = T | U | FnSelf<U>;
+export type optionsType<T, U> = optionsTypePart<T, U> | optionsTypePart<T, U>[];
 
 /**
  * Combines a types and its generator into one: `T | U | (T | U)[]` -> `T[]`
@@ -11,24 +13,30 @@ export type optionsType<T, U> = T | U | (T | U)[];
  *  - `method` arg on type `U` is a function
  *  - function `method` on type `U` returns `T`
  */
-export function normalizeOption<T extends JsonObject, U extends JsonObject>(
-    option: optionsType<T, U>,
+export function normalizeOption<
+    Json extends JsonObject,
+    Generator extends JsonObject
+>(
+    option: optionsType<Json, Generator>,
+    cls: new () => Generator,
     method = 'toJson'
-): T[] {
-    const options: T[] = [];
+): Json[] {
+    const options: Json[] = [];
 
-    if (Array.isArray(option)) {
-        if (option.length > 0) {
-            return option.map((opt) => {
-                if (method in opt && opt[method] instanceof Function)
-                    return opt[method]();
-                else return opt;
-            });
-        }
-    } else {
-        if (method in option && option[method] instanceof Function)
-            return [option[method]()];
-        else return [option] as T[];
+    if (!Array.isArray(option)) {
+        option = [option];
+    }
+    if (option.length > 0) {
+        return option.map((opt) => {
+            if (opt instanceof Function) {
+                opt = opt(new cls());
+            }
+            if (method in opt && opt[method] instanceof Function) {
+                return opt[method]();
+            } else {
+                return opt;
+            }
+        });
     }
 
     return options;

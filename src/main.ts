@@ -3,7 +3,6 @@ import {
     CommandOptionRunnable,
     CommandRunnable,
     POSTAPIApplicationCommand,
-    POSTAPIApplicationCommandOption,
 } from './types/commands';
 import { emsg, errorMessage, setEmsgShim } from './util/errorMessage';
 import { normalizeOption, optionsType } from './util/normalizeOption';
@@ -60,8 +59,12 @@ function setCommandsLoop(
 export function addCommand(
     commandRaw: optionsType<CommandRunnable, CommandGenerator>
 ) {
-    let commands = normalizeOption(commandRaw),
-        commands_n = normalizeOption(commandRaw, 'toJsonRunnable');
+    let commands = normalizeOption(commandRaw, CommandGenerator),
+        commands_n = normalizeOption(
+            commandRaw,
+            CommandGenerator,
+            'toJsonRunnable'
+        );
 
     CommandsRaw.push(...commands);
     setCommandsLoop(commands_n);
@@ -91,11 +94,15 @@ function _initClient(client: Client<true>, forceRegister = false) {
     registerCommands(CommandsRaw, ClientToken, ClientID, forceRegister);
 
     client.on('interactionCreate', async (interaction) => {
-        if (!interaction.isChatInputCommand()) return;
+        if (!interaction.isCommand()) return;
 
         try {
+            var subcommand: string | undefined;
+            if (interaction.isChatInputCommand()) {
+                subcommand = interaction.options.getSubcommand();
+            }
             var commandFound = getRun(
-                [interaction.commandName, interaction.options.getSubcommand()],
+                [interaction.commandName, subcommand],
                 interaction.guild?.id
             );
 
