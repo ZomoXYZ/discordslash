@@ -57,7 +57,8 @@ function setCommandsLoop(
 }
 
 export function addCommand(
-    commandRaw: optionsType<CommandRunnable, CommandGenerator>
+    commandRaw: optionsType<CommandRunnable, CommandGenerator>,
+    forceRegister = false
 ) {
     let commands = normalizeOption(commandRaw, CommandGenerator),
         commands_n = normalizeOption(
@@ -70,7 +71,7 @@ export function addCommand(
     setCommandsLoop(commands_n);
 
     if (ClientReady) {
-        registerCommands(CommandsRaw, ClientToken, ClientID);
+        registerCommands(CommandsRaw, ClientToken, ClientID, forceRegister);
     }
 }
 
