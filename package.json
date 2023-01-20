@@ -1,7 +1,7 @@
 {
     "name": "discordslash",
     "description": "",
-    "version": "1.1.3",
+    "version": "1.0.2",
     "main": "lib/main.js",
     "types": "lib/main.d.ts",
     "scripts": {
@@ -16,10 +16,10 @@
     "author": "ashley zomo",
     "license": "ISC",
     "dependencies": {
-        "@discordjs/rest": "^1.6.0",
+        "@discordjs/rest": "^1.7.0",
         "discord-api-types": "^0.37.37",
-        "discord.js": "^14.8.0",
-        "esbuild": "^0.17.14",
-        "typescript": "^5.0.2"
+        "discord.js": "^14.9.0",
+        "esbuild": "^0.17.15",
+        "typescript": "^5.0.3"
     }
 }

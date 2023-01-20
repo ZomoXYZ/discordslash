@@ -12,33 +12,89 @@ export async function registerCommands(
     if (commands.length === 0) {
         return;
     }
-    const rest = new REST({ version: '10' }).setToken(token),
-        toRegister =
-            forceRegister || (await shouldRegister(commands, rest, clientID));
+    const rest = new REST({ version: '10' }).setToken(token);
+    const { newCommands, updatedCommands, existingCommands } =
+        await shouldRegister(commands, rest, clientID);
 
-    if (toRegister) {
-        console.log('Registering application commands...');
+    if (newCommands.length) {
+        const commandNames = newCommands.map((cmd) => cmd.name).join(', ');
+        console.log(`Registering application commands: ${commandNames}`);
         await rest.put(Routes.applicationCommands(clientID), {
-            body: commands,
+            body: newCommands,
         });
         console.log('Successfully registered application commands.');
     }
+
+    for (const update of updatedCommands) {
+        console.log(
+            `Updating application command ${update.cmd.name} (${update.id})`
+        );
+        await rest.patch(Routes.applicationCommand(clientID, update.id), {
+            body: update.cmd,
+        });
+        console.log(`Successfully updated application command.`);
+    }
+
+    if (existingCommands.length && forceRegister) {
+        const commandNames = existingCommands.map((cmd) => cmd.name).join(', ');
+        console.log(
+            `Forcing registration of existing application commands: ${commandNames}`
+        );
+        await rest.put(Routes.applicationCommands(clientID), {
+            body: existingCommands,
+        });
+        console.log('Successfully registered application commands.');
+    }
+}
+
+interface updateCommand {
+    cmd: POSTAPIApplicationCommand;
+    id: string;
+}
+
+interface CommandRegister {
+    newCommands: POSTAPIApplicationCommand[];
+    updatedCommands: updateCommand[];
+    existingCommands: POSTAPIApplicationCommand[];
+}
+
+interface APIApplicationCommandWithID extends POSTAPIApplicationCommand {
+    id: string;
 }
 
 async function shouldRegister(
     commands: POSTAPIApplicationCommand[],
     rest: REST,
     clientID: string
-): Promise<boolean> {
+): Promise<CommandRegister> {
     let foundCommands = (await rest.get(
         Routes.applicationCommands(clientID)
-    )) as POSTAPIApplicationCommand[];
+    )) as APIApplicationCommandWithID[];
 
-    return commands.some((cmd) => {
+    const newCommands: POSTAPIApplicationCommand[] = [];
+    const updatedCommands: updateCommand[] = [];
+    const existingCommands: POSTAPIApplicationCommand[] = [];
+
+    for (const cmd of commands) {
         const foundCmd = foundCommands.find(
             (fCmd) => cmd.name === fCmd.name && cmd.guild_id === fCmd.guild_id
         );
+
+        if (!foundCmd) {
+            // not found
+            newCommands.push(cmd);
+            continue;
+        }
+
         const compare = compareValues(cmd, foundCmd, ['dm_permission']);
-        return !compare;
-    });
+        if (!compare) {
+            // different contents
+            updatedCommands.push({ cmd, id: foundCmd.id });
+        } else {
+            // same contents
+            existingCommands.push(cmd);
+        }
+    }
+
+    return { newCommands, updatedCommands, existingCommands };
 }
