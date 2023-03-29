@@ -15,13 +15,11 @@
     },
     "author": "ashley zomo",
     "license": "ISC",
-    "devDependencies": {},
     "dependencies": {
-        "@discordjs/rest": "^1.5.0",
-        "discord-api-types": "^0.37.35",
-        "esbuild": "^0.15.18",
-        "typescript": "^4.9.5",
-        "discord.js": "^14.7.1"
-    },
-    "peerDependencies": {}
+        "@discordjs/rest": "^1.6.0",
+        "discord-api-types": "^0.37.37",
+        "discord.js": "^14.8.0",
+        "esbuild": "^0.17.14",
+        "typescript": "^5.0.2"
+    }
 }

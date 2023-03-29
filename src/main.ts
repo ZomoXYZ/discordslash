@@ -98,9 +98,9 @@ function _initClient(client: Client<true>, forceRegister = false) {
         if (!interaction.isCommand()) return;
 
         try {
-            var subcommand: string | undefined;
+            var subcommand: string | null | undefined;
             if (interaction.isChatInputCommand()) {
-                subcommand = interaction.options.getSubcommand();
+                subcommand = interaction.options.getSubcommand(false);
             }
             var commandFound = getRun(
                 [interaction.commandName, subcommand],
