@@ -18,7 +18,7 @@ export async function registerCommands(
 
     for (const update of updatedCommands) {
         console.log(
-            `Updating application command ${update.cmd.name} (${update.id})`
+            `Updating application command: ${update.cmd.name} (${update.id})`
         );
         await rest.patch(Routes.applicationCommand(clientID, update.id), {
             body: update.cmd,
