@@ -37,7 +37,7 @@ export async function registerCommands(
 
     for (const cmd of newCommands) {
         const commandNames = newCommands.map((cmd) => cmd.name).join(', ');
-        console.log(`Registering application commands: ${commandNames}`);
+        console.log(`Registering application command: ${commandNames}`);
         await rest.post(Routes.applicationCommands(clientID), {
             body: cmd,
         });
