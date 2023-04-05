@@ -16,15 +16,6 @@ export async function registerCommands(
     const { newCommands, updatedCommands, existingCommands } =
         await shouldRegister(commands, rest, clientID);
 
-    if (newCommands.length) {
-        const commandNames = newCommands.map((cmd) => cmd.name).join(', ');
-        console.log(`Registering application commands: ${commandNames}`);
-        await rest.put(Routes.applicationCommands(clientID), {
-            body: newCommands,
-        });
-        console.log('Successfully registered application commands.');
-    }
-
     for (const update of updatedCommands) {
         console.log(
             `Updating application command ${update.cmd.name} (${update.id})`
@@ -35,13 +26,20 @@ export async function registerCommands(
         console.log(`Successfully updated application command.`);
     }
 
-    if (existingCommands.length && forceRegister) {
-        const commandNames = existingCommands.map((cmd) => cmd.name).join(', ');
+    if (forceRegister) {
         console.log(
-            `Forcing registration of existing application commands: ${commandNames}`
+            `(FORCE) Adding commands to register queue: ${existingCommands
+                .map((cmd) => cmd.name)
+                .join(', ')}`
         );
-        await rest.put(Routes.applicationCommands(clientID), {
-            body: existingCommands,
+        newCommands.push(...existingCommands);
+    }
+
+    for (const cmd of newCommands) {
+        const commandNames = newCommands.map((cmd) => cmd.name).join(', ');
+        console.log(`Registering application commands: ${commandNames}`);
+        await rest.post(Routes.applicationCommands(clientID), {
+            body: cmd,
         });
         console.log('Successfully registered application commands.');
     }
