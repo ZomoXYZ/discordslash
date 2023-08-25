@@ -13,8 +13,12 @@ export async function registerCommands(
         return;
     }
     const rest = new REST({ version: '10' }).setToken(token);
-    const { newCommands, updatedCommands, existingCommands } =
-        await shouldRegister(commands, rest, clientID);
+    const {
+        newCommands,
+        updatedCommands,
+        existingCommands,
+        otherFoundCommands,
+    } = await shouldRegister(commands, rest, clientID);
 
     for (const update of updatedCommands) {
         console.log(
@@ -36,12 +40,15 @@ export async function registerCommands(
     }
 
     for (const cmd of newCommands) {
-        const commandNames = newCommands.map((cmd) => cmd.name).join(', ');
-        console.log(`Registering application command: ${commandNames}`);
+        console.log(`Registering application command: ${cmd.name}`);
         await rest.post(Routes.applicationCommands(clientID), {
             body: cmd,
         });
         console.log('Successfully registered application commands.');
+    }
+
+    for (const cmd of otherFoundCommands) {
+        console.log(`Found application command: ${cmd.name} (${cmd.id})`);
     }
 }
 
@@ -54,6 +61,7 @@ interface CommandRegister {
     newCommands: POSTAPIApplicationCommand[];
     updatedCommands: updateCommand[];
     existingCommands: POSTAPIApplicationCommand[];
+    otherFoundCommands: APIApplicationCommandWithID[];
 }
 
 interface APIApplicationCommandWithID extends POSTAPIApplicationCommand {
@@ -65,13 +73,15 @@ async function shouldRegister(
     rest: REST,
     clientID: string
 ): Promise<CommandRegister> {
-    let foundCommands = (await rest.get(
+    const foundCommands = (await rest.get(
         Routes.applicationCommands(clientID)
     )) as APIApplicationCommandWithID[];
 
     const newCommands: POSTAPIApplicationCommand[] = [];
     const updatedCommands: updateCommand[] = [];
     const existingCommands: POSTAPIApplicationCommand[] = [];
+
+    const otherFoundCommands: APIApplicationCommandWithID[] = [];
 
     for (const cmd of commands) {
         const foundCmd = foundCommands.find(
@@ -94,5 +104,16 @@ async function shouldRegister(
         }
     }
 
-    return { newCommands, updatedCommands, existingCommands };
+    for (const fcmd of foundCommands) {
+        if (!commands.find((cmd) => cmd.name === fcmd.name)) {
+            otherFoundCommands.push(fcmd);
+        }
+    }
+
+    return {
+        newCommands,
+        updatedCommands,
+        existingCommands,
+        otherFoundCommands,
+    };
 }
