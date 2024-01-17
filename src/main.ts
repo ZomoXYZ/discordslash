@@ -79,7 +79,7 @@ export function addCommand(
 export function initClient(client: Client, forceRegister = false) {
     //client isn't ready
     if (client.readyAt !== null) {
-        _initClient(client, forceRegister);
+        _initClient(client as Client<true>, forceRegister);
     } else {
         client.once('ready', (clientReady) =>
             _initClient(clientReady, forceRegister)
