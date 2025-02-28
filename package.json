@@ -16,10 +16,10 @@
     "author": "ashley zomo",
     "license": "ISC",
     "dependencies": {
-        "@discordjs/rest": "^2.0.1",
-        "discord-api-types": "^0.37.55",
-        "discord.js": "^14.13.0",
-        "esbuild": "^0.19.2",
-        "typescript": "^5.2.2"
+        "@discordjs/rest": "^2.4.3",
+        "discord-api-types": "^0.37.119",
+        "discord.js": "^14.18.0",
+        "esbuild": "^0.25.0",
+        "typescript": "^5.7.3"
     }
 }
